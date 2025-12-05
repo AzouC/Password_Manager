@@ -1,0 +1,40 @@
+# Password_Manager/.gitlab-ci.yml
+image: gcc:latest
+
+stages:
+  - build
+  - test
+  - pages
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+before_script:
+  - apt-get update -qy
+  - apt-get install -y cmake libssl-dev doxygen
+
+build:
+  stage: build
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 week
+
+pages:
+  stage: pages
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake -DBUILD_DOCS=ON ..
+    - make docs
+    - mv docs/html/ public/
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
